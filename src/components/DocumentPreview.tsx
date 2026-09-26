@@ -1,11 +1,12 @@
 import type { DocumentData } from "@/types-document";
 import { calculateItem, calculateTotals, money } from "@/lib/document-utils";
+import markAsset from "@/assets/coredoc-logo.png.asset.json";
 
-export function DocumentPreview({ data }: { data: DocumentData }) {
+export function DocumentPreview({ data, watermark }: { data: DocumentData; watermark: boolean }) {
   const totals = calculateTotals(data.items);
   const label = data.kind === "invoice" ? "INVOICE" : "QUOTATION";
   return (
-    <article id="document-preview" className="mx-auto aspect-[210/297] w-full max-w-[760px] overflow-hidden bg-document p-[5%] text-document-foreground shadow-document">
+    <article id="document-preview" className="relative mx-auto aspect-[210/297] w-full max-w-[760px] overflow-hidden bg-document p-[5%] pb-[10%] text-document-foreground shadow-document">
       <header className="flex items-start justify-between gap-6 border-b-2 border-primary pb-7">
         <div className="flex min-w-0 items-start gap-4">
           {data.company.logo ? <img src={data.company.logo} alt="Company logo" className="h-16 w-16 object-contain" /> : <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-primary text-xl font-bold text-primary-foreground">C</div>}
@@ -56,7 +57,8 @@ export function DocumentPreview({ data }: { data: DocumentData }) {
         <div>{data.terms && <><p className="document-label">TERMS & CONDITIONS</p><p className="mt-1 whitespace-pre-line text-document-muted">{data.terms}</p></>}</div>
       </section>
       {data.kind === "invoice" && Object.values(data.payment).some(Boolean) && <section className="mt-5 text-[10px]"><p className="document-label">PAYMENT DETAILS</p><p className="mt-1 text-document-muted">{[data.payment.upi && `UPI: ${data.payment.upi}`, data.payment.bank, data.payment.account && `A/C: ${data.payment.account}`, data.payment.ifsc && `IFSC: ${data.payment.ifsc}`].filter(Boolean).join(" · ")}</p></section>}
-      <footer className="mt-8 text-center text-[10px] font-medium text-document-muted">Thank you for your business.</footer>
+       <footer className="mt-8 text-center text-[10px] font-medium text-document-muted">Thank you for your business.</footer>
+       {watermark && <div className="absolute inset-x-0 bottom-[3%] flex items-center justify-center gap-1 text-[10px] font-semibold text-document-muted"><img src={markAsset.url} alt="" className="h-4 w-4 object-contain" />Created with CoreDoc</div>}
     </article>
   );
 }
