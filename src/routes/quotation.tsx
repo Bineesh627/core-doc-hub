@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { DocumentBuilder } from "@/components/DocumentBuilder";
+export const Route = createFileRoute("/quotation")({ head: () => ({ meta: [{ title: "Free Quotation Generator — CoreDoc" }, { name: "description", content: "Create, preview, download, and share a professional quotation for free." }, { property: "og:title", content: "Free Quotation Generator — CoreDoc" }, { property: "og:description", content: "Create a professional quotation in minutes with CoreDoc." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }), component: () => <DocumentBuilder kind="quotation" /> });
