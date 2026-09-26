@@ -5,6 +5,7 @@ import { Button } from "@/components/Button";
 import { DocumentPreview } from "@/components/DocumentPreview";
 import { calculateItem, calculateTotals, createInitialDocument, documentSummary, money } from "@/lib/document-utils";
 import type { CompanyDetails, DocumentData, DocumentKind, LineItem, PartyDetails } from "@/types-document";
+import markAsset from "@/assets/coredoc-logo.png.asset.json";
 
 const inputClass = "mt-1.5 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15";
 const taxOptions = [0, 5, 12, 18, 28];
@@ -16,6 +17,7 @@ function Field({ label, value, onChange, type = "text", placeholder }: { label: 
 export function DocumentBuilder({ kind }: { kind: DocumentKind }) {
   const [data, setData] = useState<DocumentData>(() => createInitialDocument(kind));
   const [notice, setNotice] = useState("");
+  const [watermark, setWatermark] = useState(true);
   const label = kind === "invoice" ? "Invoice" : "Quotation";
 
   useEffect(() => {
@@ -64,7 +66,22 @@ export function DocumentBuilder({ kind }: { kind: DocumentKind }) {
     y = Math.max(y + 18, 145); pdf.text("Subtotal", 145, y); pdf.text(money(totals.subtotal).replace("₹", "Rs. "), 187, y, { align: "right" }); y += 7; pdf.text("Discount", 145, y); pdf.text(`- ${money(totals.discount).replace("₹", "Rs. ")}`, 187, y, { align: "right" }); y += 7; pdf.text("Tax", 145, y); pdf.text(money(totals.tax).replace("₹", "Rs. "), 187, y, { align: "right" }); y += 10; pdf.setFillColor(18, 94, 180); pdf.rect(140, y - 6, 50, 10, "F"); pdf.setTextColor(255); pdf.setFont("helvetica", "bold"); pdf.text("TOTAL", 144, y); pdf.text(money(totals.total).replace("₹", "Rs. "), 187, y, { align: "right" });
     pdf.setTextColor(20, 31, 48); pdf.setFontSize(8); y += 25; if (data.notes) { pdf.setFont("helvetica", "bold"); pdf.text("NOTES", 20, y); pdf.setFont("helvetica", "normal"); pdf.setTextColor(91, 105, 123); pdf.text(pdf.splitTextToSize(data.notes, 75), 20, y + 6); }
     if (data.terms) { pdf.setTextColor(20, 31, 48); pdf.setFont("helvetica", "bold"); pdf.text("TERMS & CONDITIONS", 110, y); pdf.setFont("helvetica", "normal"); pdf.setTextColor(91, 105, 123); pdf.text(pdf.splitTextToSize(data.terms, 80), 110, y + 6); }
-    pdf.setTextColor(91, 105, 123); pdf.text("Created with CoreDoc", 105, 286, { align: "center" });
+    if (watermark) {
+      try {
+        const response = await fetch(markAsset.url);
+        if (response.ok) {
+          const blob = await response.blob();
+          const logoData = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result));
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(blob);
+          });
+          pdf.addImage(logoData, "PNG", 77, 282, 5, 5);
+        }
+      } catch { /* Text watermark still appears if the image cannot load. */ }
+      pdf.setTextColor(91, 105, 123); pdf.setFont("helvetica", "bold"); pdf.setFontSize(8); pdf.text("Created with CoreDoc", 85, 286);
+    }
     return pdf;
   };
 
@@ -76,7 +93,7 @@ export function DocumentBuilder({ kind }: { kind: DocumentKind }) {
   };
 
   return <main className="min-h-screen bg-workspace">
-    <header className="border-b border-border bg-background"><div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-3 sm:px-6"><Link to="/" className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" />CoreDoc</Link><div className="flex items-center gap-2"><Button variant="secondary" onClick={share}><Share2 className="h-4 w-4" />Share</Button><Button onClick={download}><Download className="h-4 w-4" />Download PDF</Button></div></div></header>
+    <header className="border-b border-border bg-background"><div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6"><Link to="/" className="flex items-center gap-2 text-sm font-bold text-foreground hover:text-primary"><ArrowLeft className="h-4 w-4" /><img src={markAsset.url} alt="" className="h-8 w-8 object-contain" />CoreDoc</Link><div className="flex w-full items-center gap-2 sm:w-auto"><Button variant="secondary" className="flex-1 sm:flex-none" onClick={share}><Share2 className="h-4 w-4" />Share</Button><Button className="flex-1 sm:flex-none" onClick={download}><Download className="h-4 w-4" />Download PDF</Button></div></div></header>
     {notice && <div role="status" className="fixed right-4 top-20 z-20 rounded-md bg-foreground px-4 py-3 text-sm font-medium text-background shadow-lg">{notice}</div>}
     <div className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6"><div className="mb-5"><p className="text-xs font-bold uppercase tracking-widest text-primary">Document builder</p><h1 className="mt-1 text-2xl font-bold text-foreground">Create {label}</h1><p className="mt-1 text-sm text-muted-foreground">Changes appear in the preview instantly.</p></div>
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(520px,0.9fr)_minmax(580px,1.1fr)]">
@@ -90,9 +107,10 @@ export function DocumentBuilder({ kind }: { kind: DocumentKind }) {
           <FormSection title="Notes & terms"><div className="grid gap-4 sm:grid-cols-2"><label className="text-xs font-semibold">Notes<textarea className={inputClass} rows={3} value={data.notes} onChange={(e) => setData((c) => ({ ...c, notes: e.target.value }))} /></label><label className="text-xs font-semibold">Terms & conditions<textarea className={inputClass} rows={3} value={data.terms} onChange={(e) => setData((c) => ({ ...c, terms: e.target.value }))} /></label></div></FormSection>
           {kind === "invoice" && <FormSection title="Payment details (optional)"><div className="grid gap-4 sm:grid-cols-2"><Field label="UPI ID" value={data.payment.upi} onChange={(v) => setData((c) => ({ ...c, payment: { ...c.payment, upi: v } }))} /><Field label="Bank name" value={data.payment.bank} onChange={(v) => setData((c) => ({ ...c, payment: { ...c.payment, bank: v } }))} /><Field label="Account number" value={data.payment.account} onChange={(v) => setData((c) => ({ ...c, payment: { ...c.payment, account: v } }))} /><Field label="IFSC" value={data.payment.ifsc} onChange={(v) => setData((c) => ({ ...c, payment: { ...c.payment, ifsc: v } }))} /></div></FormSection>}
         </div>
-        <aside className="xl:sticky xl:top-5"><div className="mb-3 flex items-center justify-between"><div className="flex items-center gap-2 text-sm font-bold"><FileText className="h-4 w-4 text-primary" />Live preview</div><span className="text-xs text-muted-foreground">A4 document</span></div><DocumentPreview data={data} /><div className="mt-4 grid grid-cols-2 gap-3"><Button variant="secondary" onClick={share}><Share2 className="h-4 w-4" />Share</Button><Button onClick={download}><Download className="h-4 w-4" />Download PDF</Button></div></aside>
+        <aside className="min-w-0 xl:sticky xl:top-5"><div className="mb-3 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2 text-sm font-bold"><FileText className="h-4 w-4 text-primary" />Live preview</div><label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-foreground"><input type="checkbox" role="switch" checked={watermark} onChange={(event) => setWatermark(event.target.checked)} className="h-4 w-4 accent-primary" />CoreDoc watermark</label></div><div className="overflow-x-auto"><DocumentPreview data={data} watermark={watermark} /></div><div className="mt-4 grid grid-cols-2 gap-3"><Button variant="secondary" onClick={share}><Share2 className="h-4 w-4" />Share</Button><Button onClick={download}><Download className="h-4 w-4" />Download PDF</Button></div></aside>
       </div>
     </div>
+    <footer className="border-t border-border bg-background px-4 py-6 text-center text-xs text-muted-foreground">Created by <span role="img" aria-label="love">❤️</span> CorePro Techno LLP</footer>
   </main>;
 }
 
