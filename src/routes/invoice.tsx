@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { DocumentBuilder } from "@/components/DocumentBuilder";
+export const Route = createFileRoute("/invoice")({ head: () => ({ meta: [{ title: "Free Invoice Generator — CoreDoc" }, { name: "description", content: "Create, preview, download, and share a professional invoice for free." }, { property: "og:title", content: "Free Invoice Generator — CoreDoc" }, { property: "og:description", content: "Create a professional invoice in minutes with CoreDoc." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }), component: () => <DocumentBuilder kind="invoice" /> });

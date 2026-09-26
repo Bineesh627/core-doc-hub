@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep CoreDoc frontend-only; all document data, calculations, PDF generation, and sharing stay in the browser because the product promises no accounts or backend.
+- Use one shared document model and calculation utility for invoice and quotation builders so preview and export totals cannot diverge.
