@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Download, FileText, Plus, Save, Share2, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/Button";
@@ -46,10 +46,14 @@ export function DocumentBuilder({ kind }: { kind: DocumentKind }) {
     const pdf = new jsPDF({ unit: "mm", format: "a4" });
     const totals = calculateTotals(data.items);
     const title = label.toUpperCase();
+    if (data.company.logo) {
+      try { pdf.addImage(data.company.logo, 20, 13, 18, 18, undefined, "FAST"); } catch { /* Unsupported image formats are omitted from PDF only. */ }
+    }
     pdf.setTextColor(18, 94, 180); pdf.setFontSize(25); pdf.setFont("helvetica", "bold"); pdf.text(title, 190, 22, { align: "right" });
-    pdf.setTextColor(20, 31, 48); pdf.setFontSize(16); pdf.text(data.company.name || "Your Company", 20, 22);
+    const companyX = data.company.logo ? 43 : 20;
+    pdf.setTextColor(20, 31, 48); pdf.setFontSize(16); pdf.text(data.company.name || "Your Company", companyX, 22);
     pdf.setFont("helvetica", "normal"); pdf.setFontSize(9); pdf.setTextColor(91, 105, 123);
-    pdf.text(pdf.splitTextToSize(data.company.address || "", 85), 20, 29); pdf.text([data.company.phone, data.company.email].filter(Boolean).join(" | "), 20, 42);
+    pdf.text(pdf.splitTextToSize(data.company.address || "", 70), companyX, 29); pdf.text([data.company.phone, data.company.email].filter(Boolean).join(" | "), companyX, 42);
     pdf.setDrawColor(18, 94, 180); pdf.setLineWidth(0.7); pdf.line(20, 50, 190, 50);
     pdf.setTextColor(20, 31, 48); pdf.setFont("helvetica", "bold"); pdf.setFontSize(10); pdf.text("BILL TO", 20, 62); pdf.text(`#${data.number}`, 190, 31, { align: "right" });
     pdf.setFont("helvetica", "normal"); pdf.text(data.customer.name || "Customer", 20, 69); pdf.setTextColor(91, 105, 123); pdf.text(data.customer.company || "", 20, 75); pdf.text(pdf.splitTextToSize(data.customer.address || "", 75), 20, 81);
@@ -92,6 +96,6 @@ export function DocumentBuilder({ kind }: { kind: DocumentKind }) {
   </main>;
 }
 
-function FormSection({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
+function FormSection({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   return <section className="rounded-md border border-border bg-card p-4 shadow-panel sm:p-5"><div className="mb-4 flex min-h-8 items-center justify-between gap-3"><h2 className="text-sm font-bold text-foreground">{title}</h2>{action}</div>{children}</section>;
 }
