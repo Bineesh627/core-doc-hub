@@ -11,3 +11,4 @@
 
 - Keep CoreDoc frontend-only; all document data, calculations, PDF generation, and sharing stay in the browser because the product promises no accounts or backend.
 - Use one shared document model and calculation utility for invoice and quotation builders so preview and export totals cannot diverge.
+- Keep document branding optional and synchronized between the live preview and browser-generated PDF so exported files match what users see.
