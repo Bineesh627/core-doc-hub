@@ -9,7 +9,7 @@ export function DocumentPreview({ data, watermark }: { data: DocumentData; water
     <article id="document-preview" className="relative mx-auto aspect-[210/297] w-full max-w-[760px] overflow-hidden bg-document p-[5%] pb-[10%] text-document-foreground shadow-document">
       <header className="flex items-start justify-between gap-6 border-b-2 border-primary pb-7">
         <div className="flex min-w-0 items-start gap-4">
-          {data.company.logo ? <img src={data.company.logo} alt="Company logo" className="h-16 w-16 object-contain" /> : <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-primary text-xl font-bold text-primary-foreground">C</div>}
+           {data.company.logo && <img src={data.company.logo} alt="Company logo" className="h-16 w-16 shrink-0 object-contain" />}
           <div className="min-w-0">
             <h2 className="break-words text-xl font-bold text-document-foreground">{data.company.name || "Your Company"}</h2>
             <p className="mt-1 whitespace-pre-line text-[11px] leading-5 text-document-muted">{data.company.address}</p>
