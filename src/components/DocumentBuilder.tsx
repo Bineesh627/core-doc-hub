@@ -110,7 +110,7 @@ export function DocumentBuilder({ kind }: { kind: DocumentKind }) {
         <aside className="min-w-0 xl:sticky xl:top-5"><div className="mb-3 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2 text-sm font-bold"><FileText className="h-4 w-4 text-primary" />Live preview</div><label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-foreground"><input type="checkbox" role="switch" checked={watermark} onChange={(event) => setWatermark(event.target.checked)} className="h-4 w-4 accent-primary" />CoreDoc watermark</label></div><div className="overflow-x-auto"><DocumentPreview data={data} watermark={watermark} /></div><div className="mt-4 grid grid-cols-2 gap-3"><Button variant="secondary" onClick={share}><Share2 className="h-4 w-4" />Share</Button><Button onClick={download}><Download className="h-4 w-4" />Download PDF</Button></div></aside>
       </div>
     </div>
-    <footer className="border-t border-border bg-background px-4 py-6 text-center text-xs text-muted-foreground">Created by <span role="img" aria-label="love">❤️</span> CorePro Techno LLP</footer>
+    <footer className="border-t border-border bg-background px-4 py-6 text-center text-xs text-muted-foreground">Created by <span role="img" aria-label="love">❤️</span> <a href="https://coreprotechno.com" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">CorePro Techno LLP</a></footer>
   </main>;
 }
 
