@@ -7,8 +7,8 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
-  // On Vercel (GitHub deploys) build with Vercel's output format; Lovable hosting is unaffected.
-  ...(process.env['VERCEL'] ? { nitro: { preset: "vercel" } } : {}),
+  // Vercel deploys serve the fully prerendered static pages via vercel.json
+  // (outputDirectory: dist/client); no server preset is needed there.
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
