@@ -1,6 +1,5 @@
 import type { DocumentData } from "@/types-document";
 import { calculateItem, calculateTotals, money } from "@/lib/document-utils";
-import markAsset from "@/assets/coredoc-logo.png.asset.json";
 
 export function DocumentPreview({ data, watermark }: { data: DocumentData; watermark: boolean }) {
   const totals = calculateTotals(data.items);
@@ -58,7 +57,7 @@ export function DocumentPreview({ data, watermark }: { data: DocumentData; water
       </section>
       {data.kind === "invoice" && Object.values(data.payment).some(Boolean) && <section className="mt-5 text-[10px]"><p className="document-label">PAYMENT DETAILS</p><p className="mt-1 text-document-muted">{[data.payment.upi && `UPI: ${data.payment.upi}`, data.payment.bank, data.payment.account && `A/C: ${data.payment.account}`, data.payment.ifsc && `IFSC: ${data.payment.ifsc}`].filter(Boolean).join(" · ")}</p></section>}
        <footer className="mt-8 text-center text-[10px] font-medium text-document-muted">Thank you for your business.</footer>
-       {watermark && <div className="absolute inset-x-0 bottom-[3%] flex items-center justify-center gap-1 text-[10px] font-semibold text-document-muted"><img src={markAsset.url} alt="" className="h-4 w-4 object-contain" />Created with CoreDoc</div>}
+       {watermark && <div className="absolute inset-x-0 bottom-[3%] flex items-center justify-center gap-1 text-[10px] font-semibold text-document-muted"><img src="/coredoc-logo.png" alt="" className="h-4 w-4 object-contain" />Created with CoreDoc</div>}
     </article>
   );
 }

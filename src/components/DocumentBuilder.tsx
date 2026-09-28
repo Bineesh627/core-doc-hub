@@ -5,7 +5,6 @@ import { Button } from "@/components/Button";
 import { DocumentPreview } from "@/components/DocumentPreview";
 import { calculateItem, calculateTotals, createInitialDocument, documentSummary, money } from "@/lib/document-utils";
 import type { CompanyDetails, DocumentData, DocumentKind, LineItem, PartyDetails } from "@/types-document";
-import markAsset from "@/assets/coredoc-logo.png.asset.json";
 
 const inputClass = "mt-1.5 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15";
 const taxOptions = [0, 5, 12, 18, 28];
@@ -68,7 +67,7 @@ export function DocumentBuilder({ kind }: { kind: DocumentKind }) {
     if (data.terms) { pdf.setTextColor(20, 31, 48); pdf.setFont("helvetica", "bold"); pdf.text("TERMS & CONDITIONS", 110, y); pdf.setFont("helvetica", "normal"); pdf.setTextColor(91, 105, 123); pdf.text(pdf.splitTextToSize(data.terms, 80), 110, y + 6); }
     if (watermark) {
       try {
-        const response = await fetch(markAsset.url);
+        const response = await fetch("/coredoc-logo.png");
         if (response.ok) {
           const blob = await response.blob();
           const logoData = await new Promise<string>((resolve, reject) => {
@@ -93,7 +92,7 @@ export function DocumentBuilder({ kind }: { kind: DocumentKind }) {
   };
 
   return <main className="min-h-screen bg-workspace">
-    <header className="border-b border-border bg-background"><div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6"><Link to="/" className="flex items-center gap-2 text-sm font-bold text-foreground hover:text-primary"><ArrowLeft className="h-4 w-4" /><img src={markAsset.url} alt="" className="h-8 w-8 object-contain" />CoreDoc</Link><div className="flex w-full items-center gap-2 sm:w-auto"><Button variant="secondary" className="flex-1 sm:flex-none" onClick={share}><Share2 className="h-4 w-4" />Share</Button><Button className="flex-1 sm:flex-none" onClick={download}><Download className="h-4 w-4" />Download PDF</Button></div></div></header>
+    <header className="border-b border-border bg-background"><div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6"><Link to="/" className="flex items-center gap-2 text-sm font-bold text-foreground hover:text-primary"><ArrowLeft className="h-4 w-4" /><img src="/coredoc-logo.png" alt="CoreDoc" className="h-8 w-8 object-contain" />CoreDoc</Link><div className="flex w-full items-center gap-2 sm:w-auto"><Button variant="secondary" className="flex-1 sm:flex-none" onClick={share}><Share2 className="h-4 w-4" />Share</Button><Button className="flex-1 sm:flex-none" onClick={download}><Download className="h-4 w-4" />Download PDF</Button></div></div></header>
     {notice && <div role="status" className="fixed right-4 top-20 z-20 rounded-md bg-foreground px-4 py-3 text-sm font-medium text-background shadow-lg">{notice}</div>}
     <div className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6"><div className="mb-5"><p className="text-xs font-bold uppercase tracking-widest text-primary">Document builder</p><h1 className="mt-1 text-2xl font-bold text-foreground">Create {label}</h1><p className="mt-1 text-sm text-muted-foreground">Changes appear in the preview instantly.</p></div>
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(520px,0.9fr)_minmax(580px,1.1fr)]">
