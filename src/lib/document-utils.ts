@@ -45,3 +45,101 @@ export function documentSummary(data: DocumentData) {
   const label = data.kind === "invoice" ? "Invoice" : "Quotation";
   return `${label} ${data.number} from ${data.company.name} for ${data.customer.name}. Total: ${money(totals.total)}.`;
 }
+
+export interface DocumentPage {
+  pageNumber: number;
+  totalPages: number;
+  isFirstPage: boolean;
+  isLastPage: boolean;
+  items: LineItem[];
+  startIndex: number;
+  showTotals: boolean;
+  showNotesTerms: boolean;
+  showPayment: boolean;
+}
+
+export function paginateDocument(data: DocumentData): DocumentPage[] {
+  const items = data.items;
+  const getItemWeight = (item: LineItem) => ((item.description || "").length > 55 ? 2 : 1);
+
+  const hasExtraBottom = Boolean(
+    data.notes ||
+    data.terms ||
+    (data.kind === "invoice" && Object.values(data.payment).some(Boolean))
+  );
+
+  const singlePageCapacity = hasExtraBottom ? 7 : 8;
+  const totalItemWeight = items.reduce((acc, it) => acc + getItemWeight(it), 0);
+
+  if (totalItemWeight <= singlePageCapacity && items.length <= singlePageCapacity) {
+    return [
+      {
+        pageNumber: 1,
+        totalPages: 1,
+        isFirstPage: true,
+        isLastPage: true,
+        items,
+        startIndex: 0,
+        showTotals: true,
+        showNotesTerms: true,
+        showPayment: true,
+      },
+    ];
+  }
+
+  const page1Capacity = 10;
+  const middlePageCapacity = 13;
+  const lastPageCapacity = hasExtraBottom ? 10 : 11;
+
+  const pagesItems: LineItem[][] = [];
+  let currentBatch: LineItem[] = [];
+  let currentBatchWeight = 0;
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    const w = getItemWeight(item);
+    const isFirst = pagesItems.length === 0;
+    const remainingAfterThis = items.length - i;
+    const isLastCandidate = remainingAfterThis <= lastPageCapacity;
+
+    const limit = isFirst
+      ? (isLastCandidate && currentBatch.length + remainingAfterThis <= singlePageCapacity ? singlePageCapacity : page1Capacity)
+      : (isLastCandidate ? lastPageCapacity : middlePageCapacity);
+
+    if (currentBatch.length > 0 && (currentBatch.length >= limit || currentBatchWeight + w > limit + 1)) {
+      pagesItems.push(currentBatch);
+      currentBatch = [item];
+      currentBatchWeight = w;
+    } else {
+      currentBatch.push(item);
+      currentBatchWeight += w;
+    }
+  }
+
+  if (currentBatch.length > 0) {
+    pagesItems.push(currentBatch);
+  }
+
+  const totalPages = pagesItems.length;
+  let runningIndex = 0;
+
+  return pagesItems.map((pageItems, idx) => {
+    const pageNumber = idx + 1;
+    const isFirstPage = pageNumber === 1;
+    const isLastPage = pageNumber === totalPages;
+    const startIndex = runningIndex;
+    runningIndex += pageItems.length;
+
+    return {
+      pageNumber,
+      totalPages,
+      isFirstPage,
+      isLastPage,
+      items: pageItems,
+      startIndex,
+      showTotals: isLastPage,
+      showNotesTerms: isLastPage,
+      showPayment: isLastPage,
+    };
+  });
+}
